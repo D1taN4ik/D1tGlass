@@ -1,6 +1,6 @@
 {
   "name": "refract-glass",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Refractive glass effect for any HTML element: edge refraction, chromatic aberration, sliding tab pill and haptics. Zero dependencies.",
   "main": "refract.js",
   "browser": "refract.js",

@@ -38,7 +38,7 @@ That's it. The element keeps its own size, position and `border-radius` — refr
 **CDN (jsDelivr):**
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/D1taN4ik/D1tGlass@1.0.0/refract.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/D1taN4ik/D1tGlass@1.0.1/refract.js"></script>
 ```
 
 **Bundlers.** The file is UMD, so `require()` works. In the browser it exposes `window.Refract`:

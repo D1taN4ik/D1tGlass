@@ -1,5 +1,5 @@
 /*!
- * refract.js v1.0.0
+ * refract.js v1.0.1
  * Refractive glass effect for any HTML element: edge refraction + chromatic aberration.
  * Usage: <script src="refract.js"></script>, then add the data-refract attribute to any element.
  * MIT License
@@ -10,7 +10,7 @@
 })(typeof self !== "undefined" ? self : this, function () {
   "use strict";
 
-  const VERSION = "1.0.0";
+  const VERSION = "1.0.1";
   const SVG_NS = "http://www.w3.org/2000/svg";
   const GLASS_SELECTOR = "[data-refract], .refract";
   const TABS_SELECTOR = "[data-rf-tabs]";
@@ -66,14 +66,22 @@
   border-radius: var(--rf-pill-radius, 999px);
   background: var(--rf-pill, rgba(255,255,255,.16));
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1px 0 rgba(255,255,255,.4);
+  /* Position uses the independent \`translate\` property: it is applied before \`scale\`,
+     so growing the pill never shifts it sideways. */
   transition:
-    transform .55s cubic-bezier(.34,1.56,.64,1),
+    translate .55s cubic-bezier(.34,1.56,.64,1),
     width .55s cubic-bezier(.34,1.56,.64,1),
-    scale .45s cubic-bezier(.34,1.56,.64,1),
-    background .25s, box-shadow .25s;
+    scale .5s cubic-bezier(.34,1.56,.64,1),
+    background .3s, box-shadow .3s;
 }
 .rf-no-anim > .rf-indicator { transition: none !important; }
 .rf-pressing > .rf-indicator {
+  /* Grow fast on press, spring back slowly on release */
+  transition:
+    translate .55s cubic-bezier(.34,1.56,.64,1),
+    width .55s cubic-bezier(.34,1.56,.64,1),
+    scale .18s cubic-bezier(.2,.9,.3,1.2),
+    background .12s, box-shadow .12s;
   scale: var(--rf-pill-grow, 1.18 1.32);
   background: var(--rf-pill-active, rgba(255,255,255,.26));
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), inset 0 1px 0 rgba(255,255,255,.6), 0 6px 18px rgba(0,0,0,.25);
@@ -357,7 +365,7 @@
       const t = items()[i];
       if (!t) return;
       indicator.style.width = t.offsetWidth + "px";
-      indicator.style.transform = `translateX(${t.offsetLeft}px)`;
+      indicator.style.translate = `${t.offsetLeft}px 0`;
     }
 
     function setActive(i, emit) {
@@ -377,9 +385,16 @@
 
     const indexFromEvent = e => items().findIndex(t => t.contains(e.target));
 
+    // Keep the "pressed" state for a minimum time so a quick tap still shows the grow
+    const MIN_PRESS = 220;
+    let pressedAt = 0, releaseTimer = 0, pressing = false;
+
     container.addEventListener("pointerdown", e => {
       const i = indexFromEvent(e);
       if (i < 0) return;
+      clearTimeout(releaseTimer);
+      pressing = true;
+      pressedAt = performance.now();
       container.classList.add("rf-pressing");
       place(i);
       if (hapticOn) haptic(10);
@@ -388,7 +403,12 @@
       const i = indexFromEvent(e);
       if (i >= 0) setActive(i, true);
     });
-    const release = () => container.classList.remove("rf-pressing");
+    const release = () => {
+      if (!pressing) return;
+      pressing = false;
+      const wait = Math.max(0, MIN_PRESS - (performance.now() - pressedAt));
+      releaseTimer = setTimeout(() => container.classList.remove("rf-pressing"), wait);
+    };
     window.addEventListener("pointerup", release);
     window.addEventListener("pointercancel", () => { release(); place(active); });
 
@@ -417,8 +437,9 @@
     if (!rootEl || rootEl.nodeType !== 1) return;
     if (rootEl.matches(GLASS_SELECTOR)) apply(rootEl, null, true);
     rootEl.querySelectorAll(GLASS_SELECTOR).forEach(el => apply(el, null, true));
-    if (rootEl.matches(TABS_SELECTOR)) tabs(rootEl);
-    rootEl.querySelectorAll(TABS_SELECTOR).forEach(tabs);
+    const initTabs = el => { if (!tabsInstances.has(el)) tabs(el); };
+    if (rootEl.matches(TABS_SELECTOR)) initTabs(rootEl);
+    rootEl.querySelectorAll(TABS_SELECTOR).forEach(initTabs);
   }
 
   function cleanup(rootEl) {
@@ -442,7 +463,7 @@
           if (el.matches(GLASS_SELECTOR)) apply(el, null, true);
           else if (inst && inst.auto && (r.attributeName === "data-refract" || r.attributeName === "class")) remove(el);
           else if (inst) render(inst); // data-rf-* changed on an element attached via JS
-          if (el.matches(TABS_SELECTOR)) tabs(el);
+          if (el.matches(TABS_SELECTOR) && !tabsInstances.has(el)) tabs(el); // ignore our own class changes
         }
       }
     });

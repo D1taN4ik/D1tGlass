@@ -2,7 +2,12 @@
 
 **Refractive glass for any HTML element** — edge refraction, chromatic aberration, a sliding tab pill and haptics. One file, zero dependencies, no build step.
 
-![refract.js preview](docs/preview.png)
+<p align="center">
+  <picture>
+    <source srcset="docs/preview.webp" type="image/webp">
+    <img src="docs/preview.png" alt="Animated preview: a refractive glass navbar with a sliding pill over a moving gradient" width="960">
+  </picture>
+</p>
 
 ```html
 <script src="refract.js"></script>

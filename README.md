@@ -1,5 +1,4 @@
-# refract.js
-
+# D1tGlass
 **Refractive glass for any HTML element** — edge refraction, chromatic aberration, a sliding tab pill and haptics. One file, zero dependencies, no build step.
 
 <p align="center">

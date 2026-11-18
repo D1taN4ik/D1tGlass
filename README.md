@@ -1,4 +1,5 @@
-# D1tGlass
+# refract.js
+
 **Refractive glass for any HTML element** — edge refraction, chromatic aberration, a sliding tab pill and haptics. One file, zero dependencies, no build step.
 
 <p align="center">
@@ -15,6 +16,8 @@
 ```
 
 That's it. The element keeps its own size, position and `border-radius` — refract.js only adds the glass.
+
+**[▶ Live demo](https://d1tan4ik.github.io/D1tGlass/)**: a small social app (chats, contacts, profile) built with refract.js.
 
 ## Features
 
@@ -152,7 +155,10 @@ The full effect relies on SVG filters inside `backdrop-filter`, which only Chrom
 
 ## Demo
 
-Open [`examples/index.html`](examples/index.html) in a Chromium browser. It shows buttons, cards, dynamic toasts, a tab bar and a draggable lens with live controls.
+- **[Live demo](https://d1tan4ik.github.io/D1tGlass/)** ([`index.html`](index.html)) is a small social app with chats, contacts and a profile. It shows glass bars, the sliding tab pill, the message composer and haptics.
+- **[Playground](https://d1tan4ik.github.io/D1tGlass/examples/)** ([`examples/index.html`](examples/index.html)) has buttons, cards, dynamic toasts and a draggable lens with live controls.
+
+Open them in a Chromium browser for the full effect.
 
 ## License
 

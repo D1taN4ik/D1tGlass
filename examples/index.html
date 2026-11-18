@@ -3,218 +3,542 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>refract.js — demo</title>
+<meta name="theme-color" content="#f6efe9">
+<meta name="description" content="Halo — a tiny social app demo built with refract.js, a refractive glass effect for any HTML element.">
+<title>Halo · refract.js demo</title>
 <style>
-  * { box-sizing: border-box; margin: 0; -webkit-tap-highlight-color: transparent; }
+  :root {
+    --ink: #1c1a24;
+    --ink-2: #5b5868;
+    --ink-3: #9a96a8;
+    --accent: #6a4dff;
+    --accent-2: #ff5fa2;
+    --card: rgba(255, 255, 255, .62);
+    --line: rgba(28, 26, 36, .07);
+    --spring: cubic-bezier(.34, 1.56, .64, 1);
+    --col: min(480px, 100vw);
+    --font: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { scroll-behavior: auto; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, "Segoe UI", Roboto, sans-serif;
-    color: #fff; background: #0b0b12; min-height: 100vh;
+    font-family: var(--font); color: var(--ink); min-height: 100vh; overflow-x: hidden;
+    background: #f6efe9;
   }
-  .bg {
-    position: fixed; inset: 0; z-index: -1;
+  button, input { font: inherit; color: inherit; }
+  button { border: 0; background: none; cursor: pointer; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ---------- Background ---------- */
+  .backdrop { position: fixed; inset: 0; z-index: -2; overflow: hidden;
     background:
-      radial-gradient(40vmax 40vmax at 15% 20%, #ff3d7f, transparent 60%),
-      radial-gradient(35vmax 35vmax at 85% 30%, #3d8bff, transparent 60%),
-      radial-gradient(45vmax 45vmax at 50% 95%, #ffb800, transparent 60%), #0b0b12;
-  }
-  main { max-width: 760px; margin: 0 auto; padding: 100px 20px 140px; }
-  h1 { font-size: 40px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 10px; }
-  h2 { font-size: 24px; margin: 44px 0 14px; }
-  p { opacity: .85; line-height: 1.5; margin-bottom: 14px; }
-  pre {
-    background: rgba(0,0,0,.45); border-radius: 16px; padding: 14px 16px; overflow-x: auto;
-    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; margin-bottom: 16px;
-  }
-  code { font-family: ui-monospace, Menlo, monospace; }
-  .stripes { height: 140px; border-radius: 24px; margin: 16px 0;
-    background: repeating-linear-gradient(45deg, #ff2d55 0 18px, #fff 18px 36px); }
-  .lines { height: 140px; border-radius: 24px; margin: 16px 0;
-    background: repeating-linear-gradient(0deg, #000 0 6px, #fff 6px 12px); }
-  .rainbow { height: 140px; border-radius: 24px; margin: 16px 0;
-    background: conic-gradient(#ff9500, #ff2d55, #af52de, #5ac8fa, #34c759, #ff9500); }
-
-  /* --- Your own site styles: size, position and radius are all yours --- */
-  .site-nav {
-    position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 20;
-    width: min(760px, calc(100% - 24px)); height: 56px; border-radius: 28px;
-    display: flex; align-items: center; justify-content: space-between; padding: 0 18px;
-  }
-  .site-nav .logo { font-weight: 800; }
-  .site-nav a { color: #fff; text-decoration: none; margin-left: 16px; font-weight: 600; font-size: 15px; }
-
-  .btn {
-    border: 0; color: #fff; cursor: pointer; font-family: inherit; font-size: 16px; font-weight: 600;
-    padding: 14px 24px; border-radius: 999px; margin: 0 8px 10px 0;
-  }
-  .square { border-radius: 14px; }
-
-  .panel { border-radius: 28px; padding: 22px; margin: 16px 0; }
-
-  .playground-stage { position: relative; height: 320px; border-radius: 28px; overflow: hidden; margin: 16px 0;
+      radial-gradient(60vmax 50vmax at 0% 0%, #ffd6c2 0%, transparent 55%),
+      radial-gradient(55vmax 45vmax at 100% 10%, #d9ccff 0%, transparent 55%),
+      radial-gradient(60vmax 50vmax at 80% 100%, #c8f1e4 0%, transparent 55%),
+      radial-gradient(50vmax 40vmax at 0% 100%, #ffe7a8 0%, transparent 55%),
+      #f6efe9; }
+  .chat-wall { position: fixed; inset: 0; z-index: -1; opacity: 0; transition: opacity .35s;
     background:
-      repeating-linear-gradient(90deg, rgba(255,255,255,.9) 0 3px, transparent 3px 22px),
-      conic-gradient(from 90deg, #ff2d55, #ff9500, #ffcc00, #34c759, #5ac8fa, #5856d6, #ff2d55); }
-  .lens {
-    position: absolute; left: 50%; top: 50%; translate: -50% -50%;
-    width: 240px; height: 130px; border-radius: 65px; cursor: grab; touch-action: none;
-    display: grid; place-items: center; font-weight: 800; font-size: 20px;
-  }
-  .controls { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 12px; align-items: center; }
-  .controls input { width: 100%; }
-  .controls output { font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
+      radial-gradient(circle at 1px 1px, rgba(106,77,255,.13) 1.2px, transparent 1.6px) 0 0 / 22px 22px,
+      linear-gradient(160deg, #ffe1d2 0%, #f0dcff 45%, #d4ecff 100%); }
+  body.in-chat .chat-wall { opacity: 1; }
 
-  .toast {
-    position: fixed; left: 50%; top: 84px; translate: -50% 0; z-index: 30;
-    padding: 14px 22px; border-radius: 22px; font-weight: 600;
-    animation: toast-in .5s cubic-bezier(.34,1.56,.64,1);
+  /* ---------- Layout ---------- */
+  .app { width: var(--col); margin: 0 auto; padding: calc(96px + env(safe-area-inset-top)) 16px calc(120px + env(safe-area-inset-bottom)); min-height: 100vh; }
+  .view { display: none; }
+  .view.active { display: block; animation: view-in .45s var(--spring); }
+  @keyframes view-in { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+  .view-title { font-size: 34px; font-weight: 800; letter-spacing: -.03em; margin: 4px 4px 14px; }
+
+  /* ---------- Glass bars (refract.js does the glass) ---------- */
+  .appbar, .tabbar, .composer { position: fixed; left: 50%; z-index: 20; translate: -50% 0;
+    width: calc(var(--col) - 24px); transition: translate .5s var(--spring), opacity .3s; }
+  .appbar {
+    top: max(12px, env(safe-area-inset-top)); height: 60px; border-radius: 30px;
+    display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; padding: 0 8px;
+    --rf-tint: rgba(255,255,255,.42); --rf-highlight: rgba(255,255,255,.6);
   }
-  @keyframes toast-in { from { opacity: 0; translate: -50% -20px; scale: .9; } }
+  .appbar .center { display: flex; align-items: center; justify-content: center; gap: 10px; min-width: 0; }
+  .brand { display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 18px; letter-spacing: -.02em; }
+  .brand i { width: 24px; height: 24px; border-radius: 8px; display: block;
+    background: conic-gradient(from 210deg, var(--accent), var(--accent-2), #ffb35c, #3fd8b5, var(--accent));
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.6); }
+  .chat-head { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .chat-head .meta { min-width: 0; text-align: left; }
+  .chat-head b { display: block; font-size: 15.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chat-head small { display: block; font-size: 12px; color: #1fae74; font-weight: 600; }
+  .chat-head small.off { color: var(--ink-3); }
+
+  .ibtn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: var(--ink);
+    background: rgba(255,255,255,.35); box-shadow: inset 0 0 0 1px rgba(255,255,255,.6); }
+  .ibtn svg { width: 22px; height: 22px; }
+  .ibtn[hidden] { visibility: hidden; display: grid; }
 
   .tabbar {
-    position: fixed; bottom: max(16px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
-    width: min(400px, calc(100% - 32px)); height: 66px; border-radius: 33px; z-index: 20;
-    display: flex; padding: 5px;
+    bottom: max(16px, env(safe-area-inset-bottom)); height: 68px; border-radius: 34px;
+    display: flex; padding: 6px;
+    --rf-tint: rgba(255,255,255,.42); --rf-highlight: rgba(255,255,255,.6);
+    --rf-pill: rgba(106,77,255,.15); --rf-pill-active: rgba(106,77,255,.22); --rf-pill-inset: 6px;
   }
-  .tabbar a {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-    color: rgba(255,255,255,.7); text-decoration: none; font-size: 11px; font-weight: 600;
-    user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+  .tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+    font-size: 11px; font-weight: 650; color: var(--ink-2); user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none; transition: color .25s; }
+  .tabbar a svg { width: 24px; height: 24px; }
+  .tabbar a.is-active { color: var(--accent); }
+  .tabbar .dot { position: absolute; top: 9px; margin-left: 22px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+    background: var(--accent-2); color: #fff; font-size: 10.5px; font-weight: 800; display: grid; place-items: center; }
+
+  .composer {
+    bottom: max(16px, env(safe-area-inset-bottom)); height: 60px; border-radius: 30px;
+    display: flex; align-items: center; gap: 8px; padding: 0 8px 0 18px;
+    translate: -50% 180%; opacity: 0;
+    --rf-tint: rgba(255,255,255,.34); --rf-highlight: rgba(255,255,255,.6);
   }
-  .tabbar a.is-active { color: #fff; }
-  .tabbar svg { width: 24px; height: 24px; }
-  .badge { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 13px; font-weight: 700;
-    background: rgba(255,255,255,.15); margin-left: 8px; vertical-align: middle; }
+  .composer input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font-size: 16px; }
+  .composer input::placeholder { color: var(--ink-3); }
+  .send { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; color: #fff;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 6px 16px rgba(106,77,255,.35); }
+  .send svg { width: 20px; height: 20px; }
+  body.in-chat .tabbar { translate: -50% 180%; opacity: 0; pointer-events: none; }
+  body.in-chat .composer { translate: -50% 0; opacity: 1; }
+
+  /* ---------- Shared bits ---------- */
+  .avatar { --s: 48px; width: var(--s); height: var(--s); flex: none; border-radius: 50%; position: relative;
+    display: grid; place-items: center; color: #fff; font-weight: 800; font-size: calc(var(--s) * .36);
+    background: linear-gradient(135deg, var(--g1), var(--g2)); text-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .avatar.online::after { content: ""; position: absolute; right: 1px; bottom: 1px; width: 26%; height: 26%; border-radius: 50%;
+    background: #26c281; box-shadow: 0 0 0 2.5px #fff; }
+  .search { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 16px; margin-bottom: 18px; border-radius: 23px;
+    background: var(--card); box-shadow: inset 0 0 0 1px rgba(255,255,255,.7), 0 1px 2px rgba(0,0,0,.04); color: var(--ink-3); }
+  .search input { flex: 1; border: 0; outline: 0; background: none; color: var(--ink); font-size: 16px; }
+  .search svg { width: 18px; height: 18px; flex: none; }
+  .section-label { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-3); margin: 18px 6px 10px; }
+  .card { background: var(--card); border-radius: 26px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.75), 0 8px 30px rgba(60,40,90,.06); overflow: hidden; }
+
+  /* ---------- Chats ---------- */
+  .stories { display: flex; gap: 14px; overflow-x: auto; padding: 4px 4px 14px; margin: 0 -16px; padding-left: 20px; scrollbar-width: none; }
+  .stories::-webkit-scrollbar { display: none; }
+  .story { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink-2); flex: none; }
+  .story .ring { padding: 3px; border-radius: 50%; background: conic-gradient(var(--accent), var(--accent-2), #ffb35c, var(--accent)); }
+  .story .ring.seen { background: rgba(28,26,36,.12); }
+  .story .ring > .avatar { box-shadow: 0 0 0 3px #f6efe9; }
+  .story.add .avatar { background: rgba(255,255,255,.75); color: var(--accent); font-size: 26px; box-shadow: inset 0 0 0 1.5px rgba(106,77,255,.3); }
+
+  .row { display: flex; align-items: center; gap: 13px; padding: 12px 14px; width: 100%; text-align: left; position: relative;
+    transition: background .2s; }
+  .row + .row::before { content: ""; position: absolute; top: 0; left: 75px; right: 14px; height: 1px; background: var(--line); }
+  .row:active { background: rgba(106,77,255,.06); }
+  .row .body { flex: 1; min-width: 0; }
+  .row .top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+  .row b { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row time { font-size: 12.5px; color: var(--ink-3); flex: none; }
+  .row .sub { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; }
+  .row .sub span { font-size: 14px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .badge { min-width: 22px; height: 22px; padding: 0 7px; border-radius: 11px; flex: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; font-size: 12px; font-weight: 800; display: grid; place-items: center; }
+  .row.unread time { color: var(--accent); font-weight: 700; }
+
+  .promo { position: relative; height: 150px; border-radius: 26px; margin: 4px 0 6px; overflow: hidden; color: #fff; padding: 18px 20px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    background:
+      radial-gradient(120px 120px at 85% 25%, rgba(255,255,255,.55), transparent 70%),
+      radial-gradient(200px 160px at 10% 110%, #ffb35c, transparent 70%),
+      linear-gradient(130deg, #6a4dff, #ff5fa2); }
+  .promo b { font-size: 21px; letter-spacing: -.02em; }
+  .promo span { font-size: 13.5px; opacity: .9; margin-top: 2px; }
+
+  /* ---------- Chat ---------- */
+  .messages { display: flex; flex-direction: column; gap: 6px; padding-top: 6px; }
+  .day { align-self: center; font-size: 12px; font-weight: 700; color: var(--ink-2); padding: 6px 12px; border-radius: 12px;
+    background: rgba(255,255,255,.55); margin: 8px 0; }
+  .msg { max-width: 78%; padding: 10px 14px 8px; border-radius: 22px; font-size: 15.5px; line-height: 1.35; position: relative;
+    animation: msg-in .45s var(--spring); word-wrap: break-word; }
+  @keyframes msg-in { from { opacity: 0; transform: translateY(10px) scale(.94); } }
+  .msg time { display: block; text-align: right; font-size: 11px; margin-top: 2px; opacity: .6; }
+  .msg.them { align-self: flex-start; background: rgba(255,255,255,.88); border-bottom-left-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,.05); }
+  .msg.me { align-self: flex-end; color: #fff; border-bottom-right-radius: 8px;
+    background: linear-gradient(135deg, var(--accent), #8f5dff 55%, var(--accent-2)); box-shadow: 0 4px 14px rgba(106,77,255,.25); }
+  .msg.photo { padding: 5px; width: 72%; }
+  .msg.photo .img { height: 200px; border-radius: 18px;
+    background:
+      radial-gradient(70px 70px at 72% 30%, #fff6c9 0%, #ffd27a 40%, transparent 42%),
+      linear-gradient(180deg, transparent 55%, rgba(30,20,60,.25) 55%),
+      linear-gradient(180deg, #ff9d6c 0%, #ff6f91 45%, #8d5cf6 100%); }
+  .msg.photo time { padding: 4px 8px 2px; }
+  .typing { align-self: flex-start; display: flex; gap: 4px; padding: 14px 16px; border-radius: 22px; border-bottom-left-radius: 8px; background: rgba(255,255,255,.88); }
+  .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-3); animation: blink 1.2s infinite; }
+  .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+  @keyframes blink { 0%, 60%, 100% { opacity: .3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-3px); } }
+
+  /* ---------- Contacts ---------- */
+  .online-strip { display: flex; gap: 16px; overflow-x: auto; padding: 4px 4px 6px; margin: 0 -16px; padding-left: 20px; scrollbar-width: none; }
+  .online-strip::-webkit-scrollbar { display: none; }
+  .online-strip button { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--ink-2); flex: none; }
+  .letter { font-size: 13px; font-weight: 800; color: var(--accent); margin: 16px 8px 8px; }
+  .row .status { font-size: 13.5px; color: var(--ink-3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row .go { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center; color: var(--accent); background: rgba(106,77,255,.09); flex: none; }
+  .row .go svg { width: 18px; height: 18px; }
+
+  /* ---------- Profile ---------- */
+  .cover { position: relative; height: 210px; border-radius: 30px; overflow: hidden;
+    background:
+      radial-gradient(90px 90px at 78% 32%, #fff3c4 0%, #ffd27a 45%, transparent 47%),
+      radial-gradient(260px 120px at 20% 105%, #3fd8b5 0%, transparent 70%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,.14) 0 2px, transparent 2px 26px),
+      linear-gradient(150deg, #6a4dff 0%, #b05cff 45%, #ff5fa2 75%, #ffb35c 100%); }
+  .cover-actions { position: absolute; top: 14px; right: 14px; display: flex; gap: 8px; }
+  .glass-chip { height: 40px; padding: 0 16px; border-radius: 20px; display: flex; align-items: center; gap: 7px;
+    color: #fff; font-weight: 700; font-size: 14px; --rf-tint: rgba(255,255,255,.12); }
+  .glass-chip svg { width: 18px; height: 18px; }
+  .glass-chip.round { width: 40px; padding: 0; justify-content: center; }
+  .me-card { text-align: center; margin-top: -54px; position: relative; }
+  .me-card .avatar { --s: 108px; margin: 0 auto; box-shadow: 0 0 0 5px #f8f1ec, 0 10px 30px rgba(106,77,255,.25); }
+  .me-card h2 { font-size: 26px; letter-spacing: -.02em; margin-top: 12px; }
+  .me-card .handle { color: var(--ink-3); font-weight: 600; font-size: 14px; margin-top: 2px; }
+  .me-card p { color: var(--ink-2); font-size: 15px; line-height: 1.45; margin: 10px auto 0; max-width: 330px; }
+  .stats { display: grid; grid-template-columns: repeat(3, 1fr); margin: 18px 0 6px; padding: 14px 0; }
+  .stats div { text-align: center; }
+  .stats b { display: block; font-size: 20px; letter-spacing: -.02em; }
+  .stats span { font-size: 12.5px; color: var(--ink-3); font-weight: 600; }
+  .stats div + div { border-left: 1px solid var(--line); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+  .tile { aspect-ratio: 1; border-radius: 16px; }
+  .t1 { background: radial-gradient(40% 40% at 70% 30%, #fff1b8, #ffb35c 60%, transparent 62%), linear-gradient(180deg, #ff8f6b, #8d5cf6); }
+  .t2 { background: repeating-linear-gradient(45deg, #6a4dff 0 10px, #8f7bff 10px 20px); }
+  .t3 { background: radial-gradient(circle at 30% 30%, #c8f1e4, #3fd8b5 50%, #1a8f7a); }
+  .t4 { background: conic-gradient(from 45deg, #ff5fa2, #ffb35c, #ffe48a, #3fd8b5, #6a4dff, #ff5fa2); }
+  .t5 { background: linear-gradient(0deg, #2d1b5e 0 40%, transparent 40%), radial-gradient(circle at 50% 75%, #ffcf6b 0 18%, transparent 19%), linear-gradient(180deg, #ff9d6c, #ff5fa2 60%, #6a4dff); }
+  .t6 { background: repeating-radial-gradient(circle at 50% 50%, #ffd6c2 0 8px, #ff8fb5 8px 16px); }
+  .t7 { background: linear-gradient(135deg, #d9ccff, #a18cff 50%, #6a4dff); }
+  .t8 { background: radial-gradient(circle at 70% 70%, #fff 0 10%, transparent 11%), linear-gradient(160deg, #4facfe, #00f2fe); }
+  .t9 { background: repeating-linear-gradient(0deg, #1c1a24 0 6px, #ffffff 6px 12px); }
+  .settings .row { cursor: pointer; }
+  .settings .ico { width: 36px; height: 36px; border-radius: 11px; display: grid; place-items: center; color: #fff; flex: none; }
+  .settings .ico svg { width: 19px; height: 19px; }
+  .switch { width: 50px; height: 30px; border-radius: 15px; background: rgba(28,26,36,.15); position: relative; transition: background .25s; flex: none; }
+  .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,.18); transition: translate .35s var(--spring); }
+  .switch.on { background: #26c281; } .switch.on::after { translate: 20px 0; }
+  .footer { text-align: center; color: var(--ink-3); font-size: 13px; margin: 26px 0 6px; line-height: 1.6; }
+  .footer a { color: var(--accent); font-weight: 700; }
+
+  .toast { position: fixed; left: 50%; top: calc(86px + env(safe-area-inset-top)); translate: -50% 0; z-index: 30;
+    padding: 12px 18px; border-radius: 20px; font-weight: 650; font-size: 14px; white-space: nowrap;
+    --rf-tint: rgba(255,255,255,.4); animation: toast-in .5s var(--spring); }
+  @keyframes toast-in { from { opacity: 0; translate: -50% -16px; scale: .92; } }
+
+  @media (prefers-reduced-motion: reduce) { .view.active, .msg { animation: none; } }
 </style>
 </head>
 <body>
-<div class="bg"></div>
+<div class="backdrop"></div>
+<div class="chat-wall"></div>
 
-<!-- 1. Site navbar: just one attribute -->
-<header class="site-nav" data-refract>
-  <span class="logo">MySite</span>
-  <nav><a href="#start">Start</a><a href="#api">API</a><a href="#play">Playground</a></nav>
+<!-- Top bar: one attribute turns it into glass -->
+<header class="appbar" data-refract data-rf-scale="40" data-rf-bezel="16" data-rf-aberration="0.1" data-rf-blur="3">
+  <button class="ibtn" id="btn-left" data-rf-press data-rf-haptic aria-label="Back"></button>
+  <div class="center" id="bar-center"></div>
+  <button class="ibtn" id="btn-right" data-rf-press data-rf-haptic aria-label="Action"></button>
 </header>
 
-<main>
-  <h1 id="start">refract.js</h1>
-  <p>Add glass to <b>any</b> element with a single attribute. Size, position and border radius come from the element's own styles.
-    Support in this browser: <span class="badge" id="support"></span></p>
-
-  <pre><code>&lt;script src="refract.js"&gt;&lt;/script&gt;
-
-&lt;header class="my-nav" data-refract&gt;...&lt;/header&gt;</code></pre>
-
-  <div class="stripes"></div>
-
-  <h2>Buttons</h2>
-  <p><code>data-rf-press</code> — springy press, <code>data-rf-haptic</code> — haptic feedback.</p>
-  <button class="btn" data-refract data-rf-press data-rf-haptic>Default</button>
-  <button class="btn" data-refract data-rf-press data-rf-haptic data-rf-tint="light">Light</button>
-  <button class="btn" data-refract data-rf-press data-rf-haptic data-rf-tint="dark">Dark</button>
-  <button class="btn square" data-refract data-rf-press data-rf-haptic data-rf-scale="30" data-rf-bezel="10">Square</button>
-  <pre><code>&lt;button class="btn" data-refract data-rf-press data-rf-haptic data-rf-tint="dark"&gt;
-  Dark
-&lt;/button&gt;</code></pre>
-
-  <div class="lines"></div>
-
-  <h2>Card</h2>
-  <div class="panel" data-refract data-rf-tint="dark" data-rf-scale="70" data-rf-bezel="28">
-    <b>Card with stronger refraction</b>
-    <p style="margin:8px 0 0">Attributes <code>data-rf-scale="70" data-rf-bezel="28"</code>. Works with any <code>border-radius</code>, including percentages.</p>
-  </div>
-
-  <div class="rainbow"></div>
-
-  <h2>Dynamic elements</h2>
-  <p>Elements added later (modals, toasts, AJAX content) are picked up automatically via MutationObserver.</p>
-  <button class="btn" id="toast-btn" data-refract data-rf-press data-rf-haptic>Show toast</button>
-
-  <h2 id="play">Playground</h2>
-  <p>Drag the lens and tweak the options. The sliders simply change <code>data-rf-*</code> attributes.</p>
-  <div class="playground-stage">
-    <div class="lens" id="lens" data-refract data-rf-tint="clear">Drag me</div>
-  </div>
-  <div class="controls panel" data-refract data-rf-tint="dark">
-    <label for="c-scale">scale</label><input id="c-scale" type="range" min="0" max="150" value="50" data-attr="scale"><output>50</output>
-    <label for="c-bezel">bezel</label><input id="c-bezel" type="range" min="2" max="65" value="20" data-attr="bezel"><output>20</output>
-    <label for="c-ab">aberration</label><input id="c-ab" type="range" min="0" max="0.4" step="0.01" value="0.08" data-attr="aberration"><output>0.08</output>
-    <label for="c-blur">blur</label><input id="c-blur" type="range" min="0" max="8" step="0.1" value="0.6" data-attr="blur"><output>0.6</output>
-    <label for="c-r">radius</label><input id="c-r" type="range" min="0" max="65" value="65" data-css="radius"><output>65</output>
-  </div>
-
-  <h2 id="api">JS API</h2>
-<pre><code>Refract.apply('.card', { scale: 60, aberration: 0.12 });
-Refract.remove(el);
-Refract.refresh(el);          // after changing border-radius
-const t = Refract.tabs(nav);  // t.index, t.select(2)
-Refract.haptic(10);
-Refract.supported;            // true in Chromium
-
-nav.addEventListener('rf:change', e =&gt; console.log(e.detail.index));</code></pre>
-
-  <div class="stripes"></div>
-  <div class="lines"></div>
+<main class="app">
+  <section class="view" id="view-chats"></section>
+  <section class="view" id="view-chat"><div class="messages" id="messages"></div></section>
+  <section class="view" id="view-contacts"></section>
+  <section class="view" id="view-profile"></section>
 </main>
 
-<!-- 2. Tab bar: glass + sliding pill -->
-<nav class="tabbar" data-refract data-rf-tabs data-rf-scale="58" data-rf-bezel="22" data-rf-aberration="0.1">
-  <a href="#start" class="is-active">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Home</a>
-  <a href="#api">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg>API</a>
-  <a href="#play">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>Playground</a>
-  <a href="#start">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Profile</a>
+<!-- Bottom tab bar: glass + sliding pill -->
+<nav class="tabbar" data-refract data-rf-tabs data-rf-scale="52" data-rf-bezel="22" data-rf-aberration="0.1" data-rf-blur="3">
+  <a href="#chats" class="is-active" data-route="chats"></a>
+  <a href="#contacts" data-route="contacts"></a>
+  <a href="#profile" data-route="profile"></a>
 </nav>
 
-<script src="../refract.js"></script>
-<script>
-  document.getElementById("support").textContent =
-    Refract.supported ? "full effect" : "fallback (blur)";
+<!-- Message composer (shown inside a chat) -->
+<form class="composer" id="composer" data-refract data-rf-scale="44" data-rf-bezel="18" data-rf-blur="3" autocomplete="off">
+  <input id="composer-input" placeholder="Message…" aria-label="Message">
+  <button class="send" type="submit" data-rf-press data-rf-haptic aria-label="Send"></button>
+</form>
 
-  // Toast: a new element, glass is applied automatically
-  document.getElementById("toast-btn").addEventListener("click", () => {
+<script src="refract.js"></script>
+<script>
+(() => {
+  "use strict";
+
+  /* ================= Icons ================= */
+  const I = {
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+    edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
+    call: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>',
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
+    chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5A8 8 0 1 1 21 12z"/></svg>',
+    users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.4 3.4-5.5 6.5-5.5s5.7 2.1 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.7 2.5 3 5.2"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+    bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+    lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+    share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7M16 6l-4-4-4 4M12 2v13"/></svg>'
+  };
+
+  /* ================= Data ================= */
+  const people = [
+    { id: "anna",  name: "Anna Kovacs",  g: ["#ff9a6b", "#ff4f8b"], online: true,  status: "Designing something shiny ✨" },
+    { id: "leo",   name: "Leo Martin",   g: ["#4facfe", "#3a7bfd"], online: true,  status: "On my bike 🚲" },
+    { id: "team",  name: "Design Team",  g: ["#6a4dff", "#b05cff"], online: false, status: "8 members", group: true },
+    { id: "mia",   name: "Mia Chen",     g: ["#b39bff", "#ff8fc7"], online: false, status: "Coffee first ☕️" },
+    { id: "omar",  name: "Omar Haddad",  g: ["#34d399", "#06b6d4"], online: true,  status: "Shipping v2 this week" },
+    { id: "sofia", name: "Sofia Rossi",  g: ["#ff7a9a", "#ffc65c"], online: false, status: "Ciao! 🍝" },
+    { id: "kai",   name: "Kai Nakamura", g: ["#667eea", "#764ba2"], online: true,  status: "Photographer · Tokyo" },
+    { id: "zoe",   name: "Zoe Laurent",  g: ["#f6b73c", "#f77f5b"], online: false, status: "Out of office until Monday" },
+    { id: "ben",   name: "Ben Walker",   g: ["#30cfd0", "#5b3fd8"], online: false, status: "Probably debugging" },
+    { id: "ivy",   name: "Ivy Patel",    g: ["#ff8a9e", "#e86aff"], online: true,  status: "Reading 📚" },
+    { id: "nora",  name: "Nora Berg",    g: ["#5ee7df", "#7f8cff"], online: false, status: "Hiking somewhere 🏔" },
+    { id: "max",   name: "Max Fischer",  g: ["#fbbf24", "#ef4444"], online: false, status: "Busy" }
+  ];
+  const byId = Object.fromEntries(people.map(p => [p.id, p]));
+
+  const chats = {
+    anna: { unread: 2, msgs: [
+      ["them", "Hey! Did you see the new glass navbar? 👀", "12:30"],
+      ["me", "Yes!! The refraction on the edges is so good", "12:31"],
+      ["them", "photo", "12:35"],
+      ["them", "Took this on the way home 🌇", "12:35"],
+      ["me", "Wow, that sky 😍", "12:38"],
+      ["them", "See you at 7?", "12:41"]
+    ] },
+    leo:  { unread: 0, msgs: [["them", "Ride tomorrow morning?", "11:02"], ["me", "Only if it's not raining 😅", "11:05"], ["them", "Forecast says sunny ☀️", "11:06"]] },
+    team: { unread: 5, msgs: [["them", "Mia: Uploaded the new icons", "10:14"], ["them", "Omar: Looks great!", "10:20"], ["them", "Kai: Can we try a lighter tint?", "10:47"]] },
+    mia:  { unread: 0, msgs: [["me", "Thanks for the feedback!", "Yesterday"], ["them", "Anytime 💜", "Yesterday"]] },
+    omar: { unread: 1, msgs: [["them", "PR is ready for review", "09:12"]] },
+    sofia:{ unread: 0, msgs: [["them", "Pizza on Friday? 🍕", "Mon"], ["me", "Always", "Mon"]] },
+    kai:  { unread: 0, msgs: [["them", "Sent you the photos from the shoot", "Sun"]] }
+  };
+  const order = ["anna", "team", "leo", "omar", "mia", "sofia", "kai"];
+  const replies = ["Haha, totally 😄", "Sounds good!", "Wait, really? 😮", "Love it 💜", "On my way!", "Let me check and get back to you", "That glass effect though ✨", "Deal 🤝"];
+
+  /* ================= Helpers ================= */
+  const $ = s => document.querySelector(s);
+  const esc = s => s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const initials = n => n.split(" ").map(w => w[0]).slice(0, 2).join("");
+  const avatar = (p, size = 48, extra = "") =>
+    `<div class="avatar ${p.online ? "online" : ""} ${extra}" style="--s:${size}px;--g1:${p.g[0]};--g2:${p.g[1]}">${initials(p.name)}</div>`;
+  const now = () => new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", hour12: false });
+  const lastText = id => { const m = chats[id].msgs.at(-1); return (m[0] === "me" ? "You: " : "") + (m[1] === "photo" ? "📷 Photo" : m[1]); };
+
+  function toast(text) {
     const t = document.createElement("div");
     t.className = "toast";
     t.setAttribute("data-refract", "");
-    t.textContent = "I was added later and I'm already glass ✨";
+    t.textContent = text;
     document.body.appendChild(t);
-    setTimeout(() => t.remove(), 2600);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  /* ================= Views ================= */
+  function renderChats(filter = "") {
+    const q = (filter || "").trim().toLowerCase();
+    const list = order.filter(id => byId[id].name.toLowerCase().includes(q));
+    const totalUnread = order.reduce((s, id) => s + chats[id].unread, 0);
+    $("#chat-dot").textContent = totalUnread;
+    $("#chat-dot").style.display = totalUnread ? "grid" : "none";
+
+    const rows = list.map(id => {
+      const p = byId[id], c = chats[id];
+      return `<button class="row ${c.unread ? "unread" : ""}" data-open="${id}">
+        ${avatar(p, 54)}
+        <div class="body">
+          <div class="top"><b>${esc(p.name)}</b><time>${c.msgs.at(-1)[2]}</time></div>
+          <div class="sub"><span>${esc(lastText(id))}</span>${c.unread ? `<i class="badge">${c.unread}</i>` : ""}</div>
+        </div></button>`;
+    }).join("");
+
+    if (filter !== null && $("#chat-list")) { $("#chat-list").innerHTML = rows || `<p class="footer">No chats found</p>`; return; }
+
+    $("#view-chats").innerHTML = `
+      <h1 class="view-title">Chats</h1>
+      <label class="search">${I.search}<input id="chat-search" type="search" placeholder="Search chats"></label>
+      <div class="stories">
+        <button class="story add"><div class="ring seen"><div class="avatar" style="--s:62px">+</div></div>You</button>
+        ${people.filter(p => !p.group).slice(0, 8).map((p, i) =>
+          `<button class="story" data-open="${p.id}"><div class="ring ${i > 4 ? "seen" : ""}">${avatar(p, 62)}</div>${p.name.split(" ")[0]}</button>`).join("")}
+      </div>
+      <div class="promo"><b>Glass, but make it social</b><span>Scroll — the bars bend everything underneath.</span></div>
+      <div class="section-label">Messages</div>
+      <div class="card" id="chat-list">${rows}</div>`;
+    $("#chat-search").addEventListener("input", e => renderChats(e.target.value));
+  }
+
+  function renderChat(id) {
+    const c = chats[id] || (chats[id] = { unread: 0, msgs: [] });
+    if (!order.includes(id)) order.unshift(id);
+    c.unread = 0;
+    $("#messages").innerHTML = `<div class="day">Today</div>` + c.msgs.map(msgHTML).join("");
+    requestAnimationFrame(() => window.scrollTo({ top: document.body.scrollHeight }));
+  }
+  function msgHTML([from, text, time]) {
+    if (text === "photo") return `<div class="msg ${from} photo"><div class="img"></div><time>${time}</time></div>`;
+    return `<div class="msg ${from}">${esc(text)}<time>${time}</time></div>`;
+  }
+
+  function renderContacts(filter = "") {
+    const q = (filter || "").trim().toLowerCase();
+    const list = people.filter(p => !p.group && p.name.toLowerCase().includes(q)).sort((a, b) => a.name.localeCompare(b.name));
+    const groups = {};
+    list.forEach(p => (groups[p.name[0]] ||= []).push(p));
+    const sections = Object.keys(groups).sort().map(L => `
+      <div class="letter">${L}</div>
+      <div class="card">${groups[L].map(p => `
+        <button class="row" data-open="${p.id}">
+          ${avatar(p, 48)}
+          <div class="body"><b>${esc(p.name)}</b><div class="status">${p.online ? "Online · " : ""}${esc(p.status)}</div></div>
+          <span class="go">${I.chat}</span>
+        </button>`).join("")}</div>`).join("");
+
+    if ($("#contact-list") && filter !== null) { $("#contact-list").innerHTML = sections || `<p class="footer">Nobody here</p>`; return; }
+
+    const online = people.filter(p => p.online);
+    $("#view-contacts").innerHTML = `
+      <h1 class="view-title">Contacts</h1>
+      <label class="search">${I.search}<input id="contact-search" type="search" placeholder="Search people"></label>
+      <div class="section-label">Online now · ${online.length}</div>
+      <div class="online-strip">${online.map(p => `<button data-open="${p.id}">${avatar(p, 58)}${p.name.split(" ")[0]}</button>`).join("")}</div>
+      <div id="contact-list">${sections}</div>`;
+    $("#contact-search").addEventListener("input", e => renderContacts(e.target.value));
+  }
+
+  function renderProfile() {
+    const me = { name: "Alex Morgan", g: ["#6a4dff", "#ff5fa2"], online: true };
+    $("#view-profile").innerHTML = `
+      <div class="cover">
+        <div class="cover-actions">
+          <button class="glass-chip" data-refract data-rf-scale="30" data-rf-bezel="12" data-rf-press data-rf-haptic data-toast="Profile editor coming soon">${I.edit}Edit</button>
+          <button class="glass-chip round" data-refract data-rf-scale="30" data-rf-bezel="14" data-rf-press data-rf-haptic data-toast="Link copied">${I.share}</button>
+        </div>
+      </div>
+      <div class="me-card">
+        ${avatar(me, 108)}
+        <h2>Alex Morgan</h2>
+        <div class="handle">@alex · Amsterdam</div>
+        <p>Building tiny interfaces with big feelings. Glass enthusiast, coffee-powered.</p>
+      </div>
+      <div class="card stats"><div><b>248</b><span>Posts</span></div><div><b>12.4k</b><span>Followers</span></div><div><b>381</b><span>Following</span></div></div>
+      <div class="section-label">Moments</div>
+      <div class="grid">${Array.from({ length: 9 }, (_, i) => `<div class="tile t${i + 1}"></div>`).join("")}</div>
+      <div class="section-label">Settings</div>
+      <div class="card settings">
+        <div class="row" data-switch><span class="ico" style="background:#ff7a59">${I.bell}</span><div class="body"><b>Notifications</b></div><span class="switch on"></span></div>
+        <div class="row" data-switch><span class="ico" style="background:#6a4dff">${I.moon}</span><div class="body"><b>Haptics</b></div><span class="switch on"></span></div>
+        <div class="row" data-toast="Your chats are end-to-end imaginary 🔒"><span class="ico" style="background:#26c281">${I.lock}</span><div class="body"><b>Privacy</b></div></div>
+      </div>
+      <p class="footer">Halo is a demo of <a href="https://github.com/D1taN4ik/D1tGlass">refract.js</a><br>Glass bars, sliding pill and haptics — all from one script.</p>`;
+  }
+
+  /* ================= Router ================= */
+  const tabsEl = document.querySelector(".tabbar");
+  const tabRoutes = ["chats", "contacts", "profile"];
+  const tabIcons = { chats: I.chat, contacts: I.users, profile: I.user };
+  const tabNames = { chats: "Chats", contacts: "Contacts", profile: "Profile" };
+  tabsEl.querySelectorAll("a").forEach(a => {
+    const r = a.dataset.route;
+    a.innerHTML = tabIcons[r] + tabNames[r] + (r === "chats" ? `<i class="dot" id="chat-dot"></i>` : "");
+  });
+  $(".send").innerHTML = I.send;
+  const tabs = Refract.tabs(tabsEl);
+  const scrollMemory = {};
+  let currentView = null;
+
+  function setBar(view, arg) {
+    const left = $("#btn-left"), right = $("#btn-right"), center = $("#bar-center");
+    if (view === "chat") {
+      const p = byId[arg];
+      left.hidden = false; left.innerHTML = I.back; left.setAttribute("aria-label", "Back");
+      right.hidden = false; right.innerHTML = I.call; right.dataset.toast = `Calling ${p.name.split(" ")[0]}…`;
+      center.innerHTML = `<div class="chat-head">${avatar(p, 38)}<div class="meta"><b>${esc(p.name)}</b><small class="${p.online ? "" : "off"}">${p.group ? p.status : p.online ? "online" : "last seen recently"}</small></div></div>`;
+    } else {
+      left.hidden = true;
+      right.hidden = false;
+      right.innerHTML = view === "profile" ? I.gear : I.plus;
+      right.dataset.toast = view === "profile" ? "Settings are below 👇" : view === "chats" ? "New chat — pick someone in Contacts" : "Invite sent ✉️";
+      center.innerHTML = `<div class="brand"><i></i>Halo</div>`;
+    }
+  }
+
+  function route() {
+    const [view, arg] = (location.hash.slice(1) || "chats").split("/");
+    const valid = view === "chat" ? byId[arg] : tabRoutes.includes(view);
+    if (!valid) { location.replace("#chats"); return; }
+
+    if (currentView && currentView !== "chat") scrollMemory[currentView] = window.scrollY;
+    document.querySelectorAll(".view").forEach(v => v.classList.toggle("active", v.id === "view-" + view));
+    document.body.classList.toggle("in-chat", view === "chat");
+    setBar(view, arg);
+
+    if (view === "chats") renderChats(null);
+    if (view === "contacts" && !$("#view-contacts").innerHTML) renderContacts(null);
+    if (view === "profile" && !$("#view-profile").innerHTML) renderProfile();
+    if (view === "chat") { renderChat(arg); renderChats(null); }
+    else {
+      const i = tabRoutes.indexOf(view);
+      if (tabs.index !== i) tabs.select(i);
+      requestAnimationFrame(() => window.scrollTo({ top: scrollMemory[view] || 0 }));
+    }
+    currentView = view;
+  }
+
+  /* ================= Interactions ================= */
+  document.addEventListener("click", e => {
+    const open = e.target.closest("[data-open]");
+    if (open) { Refract.haptic(8); location.hash = "#chat/" + open.dataset.open; return; }
+    const sw = e.target.closest("[data-switch]");
+    if (sw) { sw.querySelector(".switch").classList.toggle("on"); Refract.haptic(8); return; }
+    const t = e.target.closest("[data-toast]");
+    if (t) toast(t.dataset.toast);
   });
 
-  // Playground
-  const lens = document.getElementById("lens");
-  document.querySelectorAll(".controls input").forEach(input => {
-    const out = input.nextElementSibling;
-    input.addEventListener("input", () => {
-      out.textContent = input.value;
-      if (input.dataset.attr) lens.setAttribute("data-rf-" + input.dataset.attr, input.value);
-      else { lens.style.borderRadius = input.value + "px"; Refract.refresh(lens); }
-    });
+  let inAppSteps = 0; // go back in history only if we navigated inside the app
+  $("#btn-left").addEventListener("click", () => {
+    if (inAppSteps > 0) history.back();
+    else location.hash = "#chats";
   });
 
-  // Lens dragging
-  let drag = null;
-  lens.addEventListener("pointerdown", e => {
-    lens.setPointerCapture(e.pointerId);
-    const r = lens.getBoundingClientRect();
-    drag = { dx: e.clientX - r.left - r.width / 2, dy: e.clientY - r.top - r.height / 2 };
-    lens.style.cursor = "grabbing";
-  });
-  lens.addEventListener("pointermove", e => {
-    if (!drag) return;
-    const stage = lens.parentElement.getBoundingClientRect();
-    lens.style.left = (e.clientX - stage.left - drag.dx) + "px";
-    lens.style.top = (e.clientY - stage.top - drag.dy) + "px";
-  });
-  lens.addEventListener("pointerup", () => { drag = null; lens.style.cursor = "grab"; });
+  $("#composer").addEventListener("submit", e => {
+    e.preventDefault();
+    const input = $("#composer-input");
+    const text = input.value.trim();
+    if (!text) return;
+    const id = location.hash.split("/")[1];
+    const c = chats[id];
+    const msg = ["me", text, now()];
+    c.msgs.push(msg);
+    input.value = "";
+    $("#messages").insertAdjacentHTML("beforeend", msgHTML(msg));
+    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
 
-  // Tab change event
-  document.querySelector(".tabbar").addEventListener("rf:change", e => {
-    console.log("Tab:", e.detail.index, e.detail.tab.textContent.trim());
+    // Fake reply with a typing indicator
+    setTimeout(() => {
+      if (location.hash !== "#chat/" + id) return;
+      $("#messages").insertAdjacentHTML("beforeend", `<div class="typing" id="typing"><i></i><i></i><i></i></div>`);
+      window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+    }, 700);
+    setTimeout(() => {
+      $("#typing")?.remove();
+      const reply = ["them", replies[Math.floor(Math.random() * replies.length)], now()];
+      c.msgs.push(reply);
+      if (location.hash === "#chat/" + id) {
+        $("#messages").insertAdjacentHTML("beforeend", msgHTML(reply));
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+        Refract.haptic(6);
+      }
+    }, 1900);
   });
+
+  window.addEventListener("hashchange", () => { inAppSteps++; route(); });
+  route();
+})();
 </script>
 </body>
 </html>
